@@ -1,7 +1,7 @@
 Summary:	The Vorbis General Audio Compression Codec.
 Name:		libvorbis
 Version:	1.2.3
-Release: 	4%{?dist}
+Release: 	4%{?dist}.1
 Epoch:		1
 Group:		System Environment/Libraries
 License:	BSD
@@ -11,6 +11,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: 	libogg-devel >= 2:1.1
 Patch0:		r16326.diff
 Patch1:		r16597.diff
+Patch2:		r18151.diff
 
 %description
 Ogg Vorbis is a fully open, non-proprietary, patent- and royalty-free,
@@ -44,6 +45,7 @@ Documentation for developing applications with libvorbis.
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 sed -i "s/-O20/$RPM_OPT_FLAGS/" configure
 sed -i "s/-ffast-math//" configure
 
@@ -86,6 +88,9 @@ rm -rf $RPM_BUILD_ROOT
 %postun -p /sbin/ldconfig
 
 %changelog
+* Sun Feb  5 2012 Jindrich Novy <jnovy@redhat.com> 1.2.3-4.1
+- fix CVE-2012-0444 (#787076)
+
 * Mon Nov 23 2009 Adam Jackson <ajax@redhat.com> 1.2.3-4
 - Fix doc subpackage build (#540634)
 
