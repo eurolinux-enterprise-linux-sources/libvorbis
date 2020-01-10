@@ -1,7 +1,9 @@
+%{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
+
 Summary:	The Vorbis General Audio Compression Codec
 Name:		libvorbis
 Version:	1.3.3
-Release:	4%{?dist}
+Release:	8%{?dist}.1
 Epoch:		1
 Group:		System Environment/Libraries
 License:	BSD
@@ -9,6 +11,7 @@ URL:		http://www.xiph.org/
 Source:		http://downloads.xiph.org/releases/vorbis/%{name}-%{version}.tar.xz
 BuildRequires:	libogg-devel >= 2:1.1
 Patch2:		libvorbis-1.2.3-add-needed.patch
+Patch3:         0001-CVE-2018-5146-Prevent-out-of-bounds-write-in-codeboo.patch
 
 %description
 Ogg Vorbis is a fully open, non-proprietary, patent- and royalty-free,
@@ -42,8 +45,10 @@ Documentation for developing applications with libvorbis.
 
 %setup -q
 %patch2 -p1
-sed -i "s/-O20/$RPM_OPT_FLAGS/" configure
+%patch3 -p1
+sed -i "s|-O20|$RPM_OPT_FLAGS|" configure
 sed -i "s/-ffast-math//" configure
+sed -i "s/-mcpu=750//" configure
 
 %build
 %configure --with-ogg-libraries=%{_libdir} --disable-static
@@ -51,9 +56,8 @@ make
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make DESTDIR=$RPM_BUILD_ROOT install
-install -pm 644 -t $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version} \
-    AUTHORS COPYING README
+make DESTDIR=$RPM_BUILD_ROOT install docdir=%{_pkgdocdir}
+install -pm 644 -t $RPM_BUILD_ROOT%{_pkgdocdir} AUTHORS COPYING README
 # remove unpackaged files from the buildroot
 rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
 
@@ -62,8 +66,8 @@ make check
 
 %files
 %defattr(-,root,root)
-%doc %dir %{_docdir}/%{name}-%{version}
-%doc %{_docdir}/%{name}-%{version}/COPYING
+%doc %dir %{_pkgdocdir}
+%doc %{_pkgdocdir}/COPYING
 %{_libdir}/libvorbis.so.*
 %{_libdir}/libvorbisfile.so.*
 %{_libdir}/libvorbisenc.so.*
@@ -79,9 +83,9 @@ make check
 
 %files devel-docs
 %defattr(-,root,root)
-%{_docdir}/%{name}-%{version}/*
-%exclude %{_docdir}/%{name}-%{version}/COPYING
-%exclude %{_docdir}/%{name}-%{version}/doxygen-build.stamp
+%{_pkgdocdir}/*
+%exclude %{_pkgdocdir}/COPYING
+%exclude %{_pkgdocdir}/doxygen-build.stamp
 
 %clean 
 rm -rf $RPM_BUILD_ROOT
@@ -91,6 +95,21 @@ rm -rf $RPM_BUILD_ROOT
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Mar 20 2018 Adam Jackson <ajax@redhat.com> - 1.3.3-8.1
+- Backport fix for CVE-2018-5146
+
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 1:1.3.3-8
+- Mass rebuild 2014-01-24
+
+* Wed Jan 15 2014 Adam Jackson <ajax@redhat.com> 1.3.3-7
+- Nuke -mcpu=750 from cflags for PPC, that plus -mcpu=power7 confuses gcc.
+
+* Thu Aug  8 2013 Ville Skyttä <ville.skytta@iki.fi> - 1:1.3.3-6
+- Install docs to %%{_pkgdocdir} where available (#993967).
+
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:1.3.3-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:1.3.3-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
