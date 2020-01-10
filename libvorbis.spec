@@ -3,7 +3,7 @@
 Summary:	The Vorbis General Audio Compression Codec
 Name:		libvorbis
 Version:	1.3.3
-Release:	8%{?dist}.1
+Release:	8%{?dist}
 Epoch:		1
 Group:		System Environment/Libraries
 License:	BSD
@@ -11,7 +11,6 @@ URL:		http://www.xiph.org/
 Source:		http://downloads.xiph.org/releases/vorbis/%{name}-%{version}.tar.xz
 BuildRequires:	libogg-devel >= 2:1.1
 Patch2:		libvorbis-1.2.3-add-needed.patch
-Patch3:         0001-CVE-2018-5146-Prevent-out-of-bounds-write-in-codeboo.patch
 
 %description
 Ogg Vorbis is a fully open, non-proprietary, patent- and royalty-free,
@@ -45,8 +44,7 @@ Documentation for developing applications with libvorbis.
 
 %setup -q
 %patch2 -p1
-%patch3 -p1
-sed -i "s|-O20|$RPM_OPT_FLAGS|" configure
+sed -i "s/-O20/$RPM_OPT_FLAGS/" configure
 sed -i "s/-ffast-math//" configure
 sed -i "s/-mcpu=750//" configure
 
@@ -95,9 +93,6 @@ rm -rf $RPM_BUILD_ROOT
 %postun -p /sbin/ldconfig
 
 %changelog
-* Tue Mar 20 2018 Adam Jackson <ajax@redhat.com> - 1.3.3-8.1
-- Backport fix for CVE-2018-5146
-
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 1:1.3.3-8
 - Mass rebuild 2014-01-24
 
